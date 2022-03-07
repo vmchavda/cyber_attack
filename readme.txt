@@ -7,3 +7,4 @@ pytest -s -v TestCases\test_validation.py --soft-asserts --html=report.html --al
 pytest -s -v TestCases\test_validation.py --soft-asserts
 
 #folders Pages/TestCases/pytest.ini  - you can change setting in pytest.ini file
+
