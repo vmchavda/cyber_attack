@@ -1,0 +1,4 @@
+[WDM] - ====== WebDriver manager ======
+[WDM] - Current google-chrome version is 98.0.4758
+[WDM] - Get LATEST driver version for 98.0.4758
+[WDM] - Driver [C:\Users\vimal\.wdm\drivers\chromedriver\win32\98.0.4758.102\chromedriver.exe] found in cache

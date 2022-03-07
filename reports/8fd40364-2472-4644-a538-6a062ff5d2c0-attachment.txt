@@ -1,0 +1,38 @@
+[32mINFO    [0m WDM:logger.py:22 ====== WebDriver manager ======
+[32mINFO    [0m WDM:logger.py:12 Current google-chrome version is 98.0.4758
+[32mINFO    [0m WDM:logger.py:12 Get LATEST driver version for 98.0.4758
+[32mINFO    [0m WDM:logger.py:12 Driver [C:\Users\vimal\.wdm\drivers\chromedriver\win32\98.0.4758.102\chromedriver.exe] found in cache
+[32mINFO    [0m root:conftest.py:10 Navigating url
+[32mINFO    [0m root:test_validation.py:5 navigating to cyber attack page
+[32mINFO    [0m root:test_validation.py:11 finding text [<selenium.webdriver.remote.webelement.WebElement (session="05dc431397c69b1408576d6a288358a3", element="bd4d1dab-cfd9-4ba6-8be1-3efd633ef863")>]
+[32mINFO    [0m root:test_validation.py:13 names text ['XSS']
+[32mINFO    [0m root:test_validation.py:11 finding text [<selenium.webdriver.remote.webelement.WebElement (session="05dc431397c69b1408576d6a288358a3", element="0f386ebc-5d01-4397-acf7-822787b07cb8")>]
+[32mINFO    [0m root:test_validation.py:13 names text ['Phishing']
+[32mINFO    [0m root:test_validation.py:11 finding text [<selenium.webdriver.remote.webelement.WebElement (session="05dc431397c69b1408576d6a288358a3", element="e0004eab-4e97-4e88-9de8-46abf6e85daa")>]
+[32mINFO    [0m root:test_validation.py:13 names text ['Session hijack']
+[32mINFO    [0m root:test_validation.py:11 finding text [<selenium.webdriver.remote.webelement.WebElement (session="05dc431397c69b1408576d6a288358a3", element="1f94b2de-14df-45a0-afde-d7b14ed9f9d7")>]
+[32mINFO    [0m root:test_validation.py:13 names text ['SQL Injection']
+[32mINFO    [0m root:test_validation.py:11 finding text [<selenium.webdriver.remote.webelement.WebElement (session="05dc431397c69b1408576d6a288358a3", element="dd36cda4-979a-4980-a363-5dfe657ef6e3")>]
+[32mINFO    [0m root:test_validation.py:13 names text ['Password attack']
+[32mINFO    [0m root:test_validation.py:31 name {'Name': 'Password attack', 'Number of cases': 3285000000, 'Impact score': 5.0, 'Complexity': 1}
+[32mINFO    [0m root:test_validation.py:33 all_data [{'Name': 'Password attack', 'Number of cases': 3285000000, 'Impact score': 5.0, 'Complexity': 1}]
+[32mINFO    [0m root:test_validation.py:52 get_name all_data [{'Name': 'Password attack', 'Number of cases': 3285000000, 'Impact score': 5.0, 'Complexity': 1}]
+[32mINFO    [0m root:test_validation.py:54 get_complex all_data [{'Name': 'Password attack', 'Number of cases': 3285000000, 'Impact score': 5.0, 'Complexity': 1}]
+[32mINFO    [0m root:test_validation.py:56 get_score all_data [{'Name': 'Password attack', 'Number of cases': 3285000000, 'Impact score': 5.0, 'Complexity': 1}]
+[32mINFO    [0m root:test_validation.py:58 get_cases all_data [{'Name': 'Password attack', 'Number of cases': 3285000000, 'Impact score': 5.0, 'Complexity': 1}]
+[32mINFO    [0m root:test_validation.py:65 sorted name ['Password attack']
+[32mINFO    [0m root:test_validation.py:71 finding text ['Password attack']
+[32mINFO    [0m root:test_validation.py:94 get_name all_data ['Password attack']
+[32mINFO    [0m root:test_validation.py:95 names text ['Password attack']
+[32mINFO    [0m root:test_validation.py:65 sorted name ['Password attack']
+[32mINFO    [0m root:test_validation.py:79 finding text [3285000000]
+[32mINFO    [0m root:test_validation.py:94 get_name all_data [3285000000]
+[32mINFO    [0m root:test_validation.py:95 names text [3285000000]
+[32mINFO    [0m root:test_validation.py:65 sorted name ['Password attack']
+[32mINFO    [0m root:test_validation.py:85 finding text [5.0]
+[32mINFO    [0m root:test_validation.py:94 get_name all_data [5.0]
+[32mINFO    [0m root:test_validation.py:95 names text [5.0]
+[32mINFO    [0m root:test_validation.py:65 sorted name ['Password attack']
+[32mINFO    [0m root:test_validation.py:91 finding text [1]
+[32mINFO    [0m root:test_validation.py:94 get_name all_data [1]
+[32mINFO    [0m root:test_validation.py:95 names text [1]

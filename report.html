@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Test Report</title>
+    <link href="assets/style.css" rel="stylesheet" type="text/css"/></head>
+  <body onLoad="init()">
+    <script>/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+function toArray(iter) {
+    if (iter === null) {
+        return null;
+    }
+    return Array.prototype.slice.call(iter);
+}
+
+function find(selector, elem) { // eslint-disable-line no-redeclare
+    if (!elem) {
+        elem = document;
+    }
+    return elem.querySelector(selector);
+}
+
+function findAll(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return toArray(elem.querySelectorAll(selector));
+}
+
+function sortColumn(elem) {
+    toggleSortStates(elem);
+    const colIndex = toArray(elem.parentNode.childNodes).indexOf(elem);
+    let key;
+    if (elem.classList.contains('result')) {
+        key = keyResult;
+    } else if (elem.classList.contains('links')) {
+        key = keyLink;
+    } else {
+        key = keyAlpha;
+    }
+    sortTable(elem, key(colIndex));
+}
+
+function showAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(showExtras);
+}
+
+function hideAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(hideExtras);
+}
+
+function showExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.remove('collapsed');
+    expandcollapse.classList.remove('expander');
+    expandcollapse.classList.add('collapser');
+}
+
+function hideExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.add('collapsed');
+    expandcollapse.classList.remove('collapser');
+    expandcollapse.classList.add('expander');
+}
+
+function showFilters() {
+    const filterItems = document.getElementsByClassName('filter');
+    for (let i = 0; i < filterItems.length; i++)
+        filterItems[i].hidden = false;
+}
+
+function addCollapse() {
+    // Add links for show/hide all
+    const resulttable = find('table#results-table');
+    const showhideall = document.createElement('p');
+    showhideall.innerHTML = '<a href="javascript:showAllExtras()">Show all details</a> / ' +
+                            '<a href="javascript:hideAllExtras()">Hide all details</a>';
+    resulttable.parentElement.insertBefore(showhideall, resulttable);
+
+    // Add show/hide link to each result
+    findAll('.col-result').forEach(function(elem) {
+        const collapsed = getQueryParameter('collapsed') || 'Passed';
+        const extras = elem.parentNode.nextElementSibling;
+        const expandcollapse = document.createElement('span');
+        if (extras.classList.contains('collapsed')) {
+            expandcollapse.classList.add('expander');
+        } else if (collapsed.includes(elem.innerHTML)) {
+            extras.classList.add('collapsed');
+            expandcollapse.classList.add('expander');
+        } else {
+            expandcollapse.classList.add('collapser');
+        }
+        elem.appendChild(expandcollapse);
+
+        elem.addEventListener('click', function(event) {
+            if (event.currentTarget.parentNode.nextElementSibling.classList.contains('collapsed')) {
+                showExtras(event.currentTarget);
+            } else {
+                hideExtras(event.currentTarget);
+            }
+        });
+    });
+}
+
+function getQueryParameter(name) {
+    const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function init () { // eslint-disable-line no-unused-vars
+    resetSortHeaders();
+
+    addCollapse();
+
+    showFilters();
+
+    sortColumn(find('.initial-sort'));
+
+    findAll('.sortable').forEach(function(elem) {
+        elem.addEventListener('click',
+            function() {
+                sortColumn(elem);
+            }, false);
+    });
+}
+
+function sortTable(clicked, keyFunc) {
+    const rows = findAll('.results-table-row');
+    const reversed = !clicked.classList.contains('asc');
+    const sortedRows = sort(rows, keyFunc, reversed);
+    /* Whole table is removed here because browsers acts much slower
+     * when appending existing elements.
+     */
+    const thead = document.getElementById('results-table-head');
+    document.getElementById('results-table').remove();
+    const parent = document.createElement('table');
+    parent.id = 'results-table';
+    parent.appendChild(thead);
+    sortedRows.forEach(function(elem) {
+        parent.appendChild(elem);
+    });
+    document.getElementsByTagName('BODY')[0].appendChild(parent);
+}
+
+function sort(items, keyFunc, reversed) {
+    const sortArray = items.map(function(item, i) {
+        return [keyFunc(item), i];
+    });
+
+    sortArray.sort(function(a, b) {
+        const keyA = a[0];
+        const keyB = b[0];
+
+        if (keyA == keyB) return 0;
+
+        if (reversed) {
+            return keyA < keyB ? 1 : -1;
+        } else {
+            return keyA > keyB ? 1 : -1;
+        }
+    });
+
+    return sortArray.map(function(item) {
+        const index = item[1];
+        return items[index];
+    });
+}
+
+function keyAlpha(colIndex) {
+    return function(elem) {
+        return elem.childNodes[1].childNodes[colIndex].firstChild.data.toLowerCase();
+    };
+}
+
+function keyLink(colIndex) {
+    return function(elem) {
+        const dataCell = elem.childNodes[1].childNodes[colIndex].firstChild;
+        return dataCell == null ? '' : dataCell.innerText.toLowerCase();
+    };
+}
+
+function keyResult(colIndex) {
+    return function(elem) {
+        const strings = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed',
+            'Skipped', 'Passed'];
+        return strings.indexOf(elem.childNodes[1].childNodes[colIndex].firstChild.data);
+    };
+}
+
+function resetSortHeaders() {
+    findAll('.sort-icon').forEach(function(elem) {
+        elem.parentNode.removeChild(elem);
+    });
+    findAll('.sortable').forEach(function(elem) {
+        const icon = document.createElement('div');
+        icon.className = 'sort-icon';
+        icon.textContent = 'vvv';
+        elem.insertBefore(icon, elem.firstChild);
+        elem.classList.remove('desc', 'active');
+        elem.classList.add('asc', 'inactive');
+    });
+}
+
+function toggleSortStates(elem) {
+    //if active, toggle between asc and desc
+    if (elem.classList.contains('active')) {
+        elem.classList.toggle('asc');
+        elem.classList.toggle('desc');
+    }
+
+    //if inactive, reset all other functions and add ascending active
+    if (elem.classList.contains('inactive')) {
+        resetSortHeaders();
+        elem.classList.remove('inactive');
+        elem.classList.add('active');
+    }
+}
+
+function isAllRowsHidden(value) {
+    return value.hidden == false;
+}
+
+function filterTable(elem) { // eslint-disable-line no-unused-vars
+    const outcomeAtt = 'data-test-result';
+    const outcome = elem.getAttribute(outcomeAtt);
+    const classOutcome = outcome + ' results-table-row';
+    const outcomeRows = document.getElementsByClassName(classOutcome);
+
+    for(let i = 0; i < outcomeRows.length; i++){
+        outcomeRows[i].hidden = !elem.checked;
+    }
+
+    const rows = findAll('.results-table-row').filter(isAllRowsHidden);
+    const allRowsHidden = rows.length == 0 ? true : false;
+    const notFoundMessage = document.getElementById('not-found-message');
+    notFoundMessage.hidden = !allRowsHidden;
+}
+</script>
+    <h1>report.html</h1>
+    <p>Report generated on 07-Mar-2022 at 10:23:50 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
+    <h2>Environment</h2>
+    <table id="environment">
+      <tr>
+        <td>JAVA_HOME</td>
+        <td>C:\Program Files\Java\jdk-9.0.4</td></tr>
+      <tr>
+        <td>Packages</td>
+        <td>{"pluggy": "0.13.1", "py": "1.10.0", "pytest": "6.2.3"}</td></tr>
+      <tr>
+        <td>Platform</td>
+        <td>Windows-10-10.0.19044-SP0</td></tr>
+      <tr>
+        <td>Plugins</td>
+        <td>{"allure-pytest": "2.8.40", "ast-transformer": "1.0.3", "forked": "1.3.0", "html": "3.1.1", "metadata": "1.11.0", "rerunfailures": "10.2", "soft-assertions": "0.1.2", "xdist": "2.2.1"}</td></tr>
+      <tr>
+        <td>Python</td>
+        <td>3.9.5</td></tr></table>
+    <h2>Summary</h2>
+    <p>2 tests ran in 67.10 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">1 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">1 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>, <input checked="true" class="filter" data-test-result="rerun" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="rerun">0 rerun</span>
+    <h2>Results</h2>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable result initial-sort" col="result">Result</th>
+          <th class="sortable" col="name">Test</th>
+          <th class="sortable" col="duration">Duration</th>
+          <th class="sortable links" col="links">Links</th></tr>
+        <tr hidden="true" id="not-found-message">
+          <th colspan="4">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">TestCases/test_validation.py::TestValidation::test_case2</td>
+          <td class="col-duration">31.93</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">[gw0] win32 -- Python 3.9.5 c:\users\vimal\pycharmprojects\backendpython\venv\scripts\python.exe<br/>[gw0] win32 -- Python 3.9.5 c:\users\vimal\pycharmprojects\backendpython\venv\scripts\python.exe[gw0] win32 -- Python 3.9.5 c:\users\vimal\pycharmprojects\backendpython\venv\scripts\python.exe<br/><br/>self = &lt;TestCases.test_validation.TestValidation object at 0x000002752BE9A430&gt;<br/><br/>    import logging<br/>    from time import sleep<br/>    import pytest<br/>    from Pages.cyber_attack_page import CyberAttackPage<br/>    <br/>    <br/>    @pytest.mark.usefixtures(&quot;setup&quot;)<br/>    class TestValidation:<br/>    <br/>        def test_case1(self):<br/>    <br/>            cyber_attack_page=CyberAttackPage()<br/>            logging.info(&quot;navigating to cyber attack page&quot;)<br/>    <br/>            #sorting name<br/>            filter_names=[&#x27;Xss&#x27;,&#x27;phishing&#x27;,&#x27;session&#x27;,&#x27;injection&#x27;,&#x27;attack&#x27;]<br/>            for name in filter_names:<br/>                cyber_attack_page.filter_data.set_text(name)<br/>                list=cyber_attack_page.names.get_all_elements()<br/>                logging.info(&quot;finding text {}&quot;.format(str(list)))<br/>                names=[i.text for i in list]<br/>                logging.info(&quot;names text {}&quot;.format(str(names)))<br/>                assert name.lower() in str(names).lower(),&#x27;{} not present&#x27;.format(name)<br/>                sleep(1)<br/>    <br/>            #sorting data<br/>            all_data = []<br/>            sleep(2)<br/>            list = cyber_attack_page.rows.get_all_elements()<br/>            comp={&#x27;low&#x27;:1,&#x27;medium&#x27;:2,&#x27;high&#x27;:3}<br/>            for li in range(len(list)):<br/>                temp={}<br/>                temp[&#x27;Name&#x27;]=cyber_attack_page.get_name(li+1).text<br/>    <br/>                t=cyber_attack_page.get_no_of_cases(li+1).text<br/>                temp[&#x27;Number of cases&#x27;]=cyber_attack_page.convert_value(t)<br/>                temp[&#x27;Impact score&#x27;]=float(cyber_attack_page.get_avg_impact_score(li+1).text)<br/>    <br/>                temp[&#x27;Complexity&#x27;]=comp[cyber_attack_page.get_complexity(li+1).text]<br/>                logging.info(&quot;name {}&quot;.format(str(temp)))<br/>                all_data.append(temp)<br/>            logging.info(&quot;all_data {}&quot;.format(str(all_data)))<br/>    <br/>            def get_name(all_data):<br/>                return all_data.get(&#x27;Name&#x27;)<br/>            def get_cases(all_data):<br/>                return all_data.get(&#x27;Number of cases&#x27;)<br/>            def get_score(all_data):<br/>                return all_data.get(&#x27;Impact score&#x27;)<br/>            def get_complex(all_data):<br/>                return all_data.get(&#x27;Complexity&#x27;)<br/>            name_sort=all_data.copy()<br/>            name_sort.sort(key=get_name)<br/>            logging.info(&quot;get_name all_data {}&quot;.format(str(name_sort)))<br/>    <br/>            all_data.sort(key=get_complex)<br/>            logging.info(&quot;get_complex all_data {}&quot;.format(str(all_data)))<br/>    <br/>            all_data.sort(key=get_score)<br/>            logging.info(&quot;get_score all_data {}&quot;.format(str(all_data)))<br/>    <br/>            all_data.sort(key=get_cases)<br/>            logging.info(&quot;get_cases all_data {}&quot;.format(str(all_data)))<br/>            # end of sorting<br/>    <br/>    <br/>            sort_data = [&#x27;Name&#x27;,&#x27;Number of cases&#x27;, &#x27;Impact score&#x27;,&#x27;Complexity&#x27;]<br/>            for name in sort_data:<br/>                sleep(2)<br/>                list = cyber_attack_page.names.get_all_elements()<br/>                beforesort = [i.text for i in list]<br/>                logging.info(&quot;sorted name {}&quot;.format(str(beforesort)))<br/>                cyber_attack_page.get_sort_data(name)<br/>                sleep(2)<br/>                if &#x27;Name&#x27; == name:<br/>                    list = cyber_attack_page.names.get_all_elements()<br/>                    names = [i.text for i in list]<br/>                    logging.info(&quot;finding text {}&quot;.format(str(names)))<br/>                    name_sort.sort(key=get_name)<br/>                    name_sorted = [x[name] for x in name_sort]<br/>    <br/>                if &#x27;Number of cases&#x27; == name:<br/>                    list = cyber_attack_page.no_of_cases.get_all_elements()<br/>                    names = [i.text for i in list]<br/>                    names=[cyber_attack_page.convert_value(case) for case in names]<br/>&gt;                   logging.info(&quot;finding text {}&quot;.format(str(names)))<br/><br/>TestCases\test_validation.py:86: <br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/><br/>self = SoftAssertions(assertions=[Assert(code=&#x27;(name_sorted == names)\n&#x27;, result=False, left=[&#x27;Man in the Middle&#x27;, &#x27;Password ...sert(code=&#x27;(name_sorted == names)\n&#x27;, result=True, left=[1, 1, 1, 2, 3, 3], right=[1, 1, 1, 2, 3, 3], condition=&#x27;==&#x27;)])<br/>exc_type = None, exc_val = None, exc_tb = None<br/><br/>    def __exit__(self, exc_type, exc_val, exc_tb):<br/>        if self.is_failed:<br/>&gt;           raise AssertionError(f&#x27;\n{self.draw_results()}&#x27;)<br/><span class="error">E           AssertionError: </span><br/><span class="error">E           +----------------------+-----------+---------------------+---------------------+</span><br/><span class="error">E           |      expression      | condition |    current value    |      expected       |</span><br/><span class="error">E           +======================+===========+=====================+=====================+</span><br/><span class="error">E           | assert name_sorted   | ==        | [&#x27;Man in the        | [&#x27;Man in the        |</span><br/><span class="error">E           | == names             |           | Middle&#x27;, &#x27;Password  | Middle&#x27;, &#x27;Password  |</span><br/><span class="error">E           |                      |           | attack&#x27;,            | attack&#x27;,            |</span><br/><span class="error">E           |                      |           | &#x27;Phishing&#x27;, &#x27;SQL    | &#x27;Phishing&#x27;,         |</span><br/><span class="error">E           |                      |           | Injection&#x27;,         | &#x27;Session hijack&#x27;,   |</span><br/><span class="error">E           |                      |           | &#x27;Session hijack&#x27;,   | &#x27;SQL Injection&#x27;,    |</span><br/><span class="error">E           |                      |           | &#x27;XSS&#x27;]              | &#x27;XSS&#x27;]              |</span><br/><span class="error">E           +----------------------+-----------+---------------------+---------------------+</span><br/><br/>..\backendpython\venv\lib\site-packages\pytest_soft_asserts\libassert\lib.py:19: AssertionError[gw0] win32 -- Python 3.9.5 c:\users\vimal\pycharmprojects\backendpython\venv\scripts\python.exe<br/> -----------------------------Captured stdout setup------------------------------ <br/>
+
+<br/> -----------------------------Captured stderr setup------------------------------ <br/>[WDM] - ====== WebDriver manager ======
+[WDM] - Current google-chrome version is 98.0.4758
+[WDM] - Get LATEST driver version for 98.0.4758
+[WDM] - Driver [C:\Users\vimal\.wdm\drivers\chromedriver\win32\98.0.4758.102\chromedriver.exe] found in cache
+<br/> -------------------------------Captured log setup------------------------------- <br/>INFO     WDM:logger.py:12 ====== WebDriver manager ======
+INFO     WDM:logger.py:12 Current google-chrome version is 98.0.4758
+INFO     WDM:logger.py:12 Get LATEST driver version for 98.0.4758
+INFO     WDM:logger.py:12 Driver [C:\Users\vimal\.wdm\drivers\chromedriver\win32\98.0.4758.102\chromedriver.exe] found in cache
+INFO     root:conftest.py:10 Navigating url<br/> -------------------------------Captured log call-------------------------------- <br/>INFO     root:test_validation.py:5 navigating to cyber attack page
+INFO     root:test_validation.py:19 name {&#x27;Name&#x27;: &#x27;Man in the Middle&#x27;, &#x27;Number of cases&#x27;: 95000, &#x27;Impact score&#x27;: 8.12, &#x27;Complexity&#x27;: 3}
+INFO     root:test_validation.py:19 name {&#x27;Name&#x27;: &#x27;Password attack&#x27;, &#x27;Number of cases&#x27;: 3285000000, &#x27;Impact score&#x27;: 5.0, &#x27;Complexity&#x27;: 1}
+INFO     root:test_validation.py:19 name {&#x27;Name&#x27;: &#x27;Phishing&#x27;, &#x27;Number of cases&#x27;: 2512000000, &#x27;Impact score&#x27;: 7.18, &#x27;Complexity&#x27;: 1}
+INFO     root:test_validation.py:19 name {&#x27;Name&#x27;: &#x27;Session hijack&#x27;, &#x27;Number of cases&#x27;: 9024, &#x27;Impact score&#x27;: 5.79, &#x27;Complexity&#x27;: 3}
+INFO     root:test_validation.py:19 name {&#x27;Name&#x27;: &#x27;SQL Injection&#x27;, &#x27;Number of cases&#x27;: 125000000, &#x27;Impact score&#x27;: 10.21, &#x27;Complexity&#x27;: 2}
+INFO     root:test_validation.py:19 name {&#x27;Name&#x27;: &#x27;XSS&#x27;, &#x27;Number of cases&#x27;: 29850, &#x27;Impact score&#x27;: 2.19, &#x27;Complexity&#x27;: 1}
+INFO     root:test_validation.py:21 all_data [{&#x27;Name&#x27;: &#x27;Man in the Middle&#x27;, &#x27;Number of cases&#x27;: 95000, &#x27;Impact score&#x27;: 8.12, &#x27;Complexity&#x27;: 3}, {&#x27;Name&#x27;: &#x27;Password attack&#x27;, &#x27;Number of cases&#x27;: 3285000000, &#x27;Impact score&#x27;: 5.0, &#x27;Complexity&#x27;: 1}, {&#x27;Name&#x27;: &#x27;Phishing&#x27;, &#x27;Number of cases&#x27;: 2512000000, &#x27;Impact score&#x27;: 7.18, &#x27;Complexity&#x27;: 1}, {&#x27;Name&#x27;: &#x27;Session hijack&#x27;, &#x27;Number of cases&#x27;: 9024, &#x27;Impact score&#x27;: 5.79, &#x27;Complexity&#x27;: 3}, {&#x27;Name&#x27;: &#x27;SQL Injection&#x27;, &#x27;Number of cases&#x27;: 125000000, &#x27;Impact score&#x27;: 10.21, &#x27;Complexity&#x27;: 2}, {&#x27;Name&#x27;: &#x27;XSS&#x27;, &#x27;Number of cases&#x27;: 29850, &#x27;Impact score&#x27;: 2.19, &#x27;Complexity&#x27;: 1}]
+INFO     root:test_validation.py:40 get_name all_data [{&#x27;Name&#x27;: &#x27;Man in the Middle&#x27;, &#x27;Number of cases&#x27;: 95000, &#x27;Impact score&#x27;: 8.12, &#x27;Complexity&#x27;: 3}, {&#x27;Name&#x27;: &#x27;Password attack&#x27;, &#x27;Number of cases&#x27;: 3285000000, &#x27;Impact score&#x27;: 5.0, &#x27;Complexity&#x27;: 1}, {&#x27;Name&#x27;: &#x27;Phishing&#x27;, &#x27;Number of cases&#x27;: 2512000000, &#x27;Impact score&#x27;: 7.18, &#x27;Complexity&#x27;: 1}, {&#x27;Name&#x27;: &#x27;SQL Injection&#x27;, &#x27;Number of cases&#x27;: 125000000, &#x27;Impact score&#x27;: 10.21, &#x27;Complexity&#x27;: 2}, {&#x27;Name&#x27;: &#x27;Session hijack&#x27;, &#x27;Number of cases&#x27;: 9024, &#x27;Impact score&#x27;: 5.79, &#x27;Complexity&#x27;: 3}, {&#x27;Name&#x27;: &#x27;XSS&#x27;, &#x27;Number of cases&#x27;: 29850, &#x27;Impact score&#x27;: 2.19, &#x27;Complexity&#x27;: 1}]
+INFO     root:test_validation.py:42 get_complex all_data [{&#x27;Name&#x27;: &#x27;Password attack&#x27;, &#x27;Number of cases&#x27;: 3285000000, &#x27;Impact score&#x27;: 5.0, &#x27;Complexity&#x27;: 1}, {&#x27;Name&#x27;: &#x27;Phishing&#x27;, &#x27;Number of cases&#x27;: 2512000000, &#x27;Impact score&#x27;: 7.18, &#x27;Complexity&#x27;: 1}, {&#x27;Name&#x27;: &#x27;XSS&#x27;, &#x27;Number of cases&#x27;: 29850, &#x27;Impact score&#x27;: 2.19, &#x27;Complexity&#x27;: 1}, {&#x27;Name&#x27;: &#x27;SQL Injection&#x27;, &#x27;Number of cases&#x27;: 125000000, &#x27;Impact score&#x27;: 10.21, &#x27;Complexity&#x27;: 2}, {&#x27;Name&#x27;: &#x27;Man in the Middle&#x27;, &#x27;Number of cases&#x27;: 95000, &#x27;Impact score&#x27;: 8.12, &#x27;Complexity&#x27;: 3}, {&#x27;Name&#x27;: &#x27;Session hijack&#x27;, &#x27;Number of cases&#x27;: 9024, &#x27;Impact score&#x27;: 5.79, &#x27;Complexity&#x27;: 3}]
+INFO     root:test_validation.py:44 get_score all_data [{&#x27;Name&#x27;: &#x27;XSS&#x27;, &#x27;Number of cases&#x27;: 29850, &#x27;Impact score&#x27;: 2.19, &#x27;Complexity&#x27;: 1}, {&#x27;Name&#x27;: &#x27;Password attack&#x27;, &#x27;Number of cases&#x27;: 3285000000, &#x27;Impact score&#x27;: 5.0, &#x27;Complexity&#x27;: 1}, {&#x27;Name&#x27;: &#x27;Session hijack&#x27;, &#x27;Number of cases&#x27;: 9024, &#x27;Impact score&#x27;: 5.79, &#x27;Complexity&#x27;: 3}, {&#x27;Name&#x27;: &#x27;Phishing&#x27;, &#x27;Number of cases&#x27;: 2512000000, &#x27;Impact score&#x27;: 7.18, &#x27;Complexity&#x27;: 1}, {&#x27;Name&#x27;: &#x27;Man in the Middle&#x27;, &#x27;Number of cases&#x27;: 95000, &#x27;Impact score&#x27;: 8.12, &#x27;Complexity&#x27;: 3}, {&#x27;Name&#x27;: &#x27;SQL Injection&#x27;, &#x27;Number of cases&#x27;: 125000000, &#x27;Impact score&#x27;: 10.21, &#x27;Complexity&#x27;: 2}]
+INFO     root:test_validation.py:46 get_cases all_data [{&#x27;Name&#x27;: &#x27;Session hijack&#x27;, &#x27;Number of cases&#x27;: 9024, &#x27;Impact score&#x27;: 5.79, &#x27;Complexity&#x27;: 3}, {&#x27;Name&#x27;: &#x27;XSS&#x27;, &#x27;Number of cases&#x27;: 29850, &#x27;Impact score&#x27;: 2.19, &#x27;Complexity&#x27;: 1}, {&#x27;Name&#x27;: &#x27;Man in the Middle&#x27;, &#x27;Number of cases&#x27;: 95000, &#x27;Impact score&#x27;: 8.12, &#x27;Complexity&#x27;: 3}, {&#x27;Name&#x27;: &#x27;SQL Injection&#x27;, &#x27;Number of cases&#x27;: 125000000, &#x27;Impact score&#x27;: 10.21, &#x27;Complexity&#x27;: 2}, {&#x27;Name&#x27;: &#x27;Phishing&#x27;, &#x27;Number of cases&#x27;: 2512000000, &#x27;Impact score&#x27;: 7.18, &#x27;Complexity&#x27;: 1}, {&#x27;Name&#x27;: &#x27;Password attack&#x27;, &#x27;Number of cases&#x27;: 3285000000, &#x27;Impact score&#x27;: 5.0, &#x27;Complexity&#x27;: 1}]
+INFO     root:test_validation.py:53 sorted name [&#x27;Man in the Middle&#x27;, &#x27;Password attack&#x27;, &#x27;Phishing&#x27;, &#x27;Session hijack&#x27;, &#x27;SQL Injection&#x27;, &#x27;XSS&#x27;]
+INFO     root:test_validation.py:59 finding text [&#x27;Man in the Middle&#x27;, &#x27;Password attack&#x27;, &#x27;Phishing&#x27;, &#x27;Session hijack&#x27;, &#x27;SQL Injection&#x27;, &#x27;XSS&#x27;]
+INFO     root:test_validation.py:82 get_name all_data [&#x27;Man in the Middle&#x27;, &#x27;Password attack&#x27;, &#x27;Phishing&#x27;, &#x27;SQL Injection&#x27;, &#x27;Session hijack&#x27;, &#x27;XSS&#x27;]
+INFO     root:test_validation.py:83 names text [&#x27;Man in the Middle&#x27;, &#x27;Password attack&#x27;, &#x27;Phishing&#x27;, &#x27;Session hijack&#x27;, &#x27;SQL Injection&#x27;, &#x27;XSS&#x27;]
+INFO     root:test_validation.py:53 sorted name [&#x27;Man in the Middle&#x27;, &#x27;Password attack&#x27;, &#x27;Phishing&#x27;, &#x27;Session hijack&#x27;, &#x27;SQL Injection&#x27;, &#x27;XSS&#x27;]
+INFO     root:test_validation.py:67 finding text [9024, 29850, 95000, 125000000, 2512000000, 3285000000]
+INFO     root:test_validation.py:82 get_name all_data [9024, 29850, 95000, 125000000, 2512000000, 3285000000]
+INFO     root:test_validation.py:83 names text [9024, 29850, 95000, 125000000, 2512000000, 3285000000]
+INFO     root:test_validation.py:53 sorted name [&#x27;Session hijack&#x27;, &#x27;XSS&#x27;, &#x27;Man in the Middle&#x27;, &#x27;SQL Injection&#x27;, &#x27;Phishing&#x27;, &#x27;Password attack&#x27;]
+INFO     root:test_validation.py:73 finding text [2.19, 5.0, 5.79, 7.18, 8.12, 10.21]
+INFO     root:test_validation.py:82 get_name all_data [2.19, 5.0, 5.79, 7.18, 8.12, 10.21]
+INFO     root:test_validation.py:83 names text [2.19, 5.0, 5.79, 7.18, 8.12, 10.21]
+INFO     root:test_validation.py:53 sorted name [&#x27;XSS&#x27;, &#x27;Password attack&#x27;, &#x27;Session hijack&#x27;, &#x27;Phishing&#x27;, &#x27;Man in the Middle&#x27;, &#x27;SQL Injection&#x27;]
+INFO     root:test_validation.py:79 finding text [1, 1, 1, 2, 3, 3]
+INFO     root:test_validation.py:82 get_name all_data [1, 1, 1, 2, 3, 3]
+INFO     root:test_validation.py:83 names text [1, 1, 1, 2, 3, 3]<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">TestCases/test_validation.py::TestValidation::test_case1</td>
+          <td class="col-duration">33.81</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">[gw0] win32 -- Python 3.9.5 c:\users\vimal\pycharmprojects\backendpython\venv\scripts\python.exe<br/>[gw0] win32 -- Python 3.9.5 c:\users\vimal\pycharmprojects\backendpython\venv\scripts\python.exe[gw0] win32 -- Python 3.9.5 c:\users\vimal\pycharmprojects\backendpython\venv\scripts\python.exe[gw0] win32 -- Python 3.9.5 c:\users\vimal\pycharmprojects\backendpython\venv\scripts\python.exe<br/> -----------------------------Captured stdout setup------------------------------ <br/>
+
+<br/> -----------------------------Captured stderr setup------------------------------ <br/>[WDM] - ====== WebDriver manager ======
+[WDM] - Current google-chrome version is 98.0.4758
+[WDM] - Get LATEST driver version for 98.0.4758
+[WDM] - Driver [C:\Users\vimal\.wdm\drivers\chromedriver\win32\98.0.4758.102\chromedriver.exe] found in cache
+<br/> -------------------------------Captured log setup------------------------------- <br/>INFO     WDM:logger.py:22 ====== WebDriver manager ======
+INFO     WDM:logger.py:12 Current google-chrome version is 98.0.4758
+INFO     WDM:logger.py:12 Get LATEST driver version for 98.0.4758
+INFO     WDM:logger.py:12 Driver [C:\Users\vimal\.wdm\drivers\chromedriver\win32\98.0.4758.102\chromedriver.exe] found in cache
+INFO     root:conftest.py:10 Navigating url<br/> -------------------------------Captured log call-------------------------------- <br/>INFO     root:test_validation.py:5 navigating to cyber attack page
+INFO     root:test_validation.py:11 finding text [&lt;selenium.webdriver.remote.webelement.WebElement (session=&quot;5a5dad43345413466ab649314a186ac7&quot;, element=&quot;ace0235c-b6b7-4574-a2f1-3d5538423c9b&quot;)&gt;]
+INFO     root:test_validation.py:13 names text [&#x27;XSS&#x27;]
+INFO     root:test_validation.py:11 finding text [&lt;selenium.webdriver.remote.webelement.WebElement (session=&quot;5a5dad43345413466ab649314a186ac7&quot;, element=&quot;d61f442d-2c93-491a-ab17-9202386c9913&quot;)&gt;]
+INFO     root:test_validation.py:13 names text [&#x27;Phishing&#x27;]
+INFO     root:test_validation.py:11 finding text [&lt;selenium.webdriver.remote.webelement.WebElement (session=&quot;5a5dad43345413466ab649314a186ac7&quot;, element=&quot;cec649d0-f90b-4f7a-9cd9-b580d079c5ec&quot;)&gt;]
+INFO     root:test_validation.py:13 names text [&#x27;Session hijack&#x27;]
+INFO     root:test_validation.py:11 finding text [&lt;selenium.webdriver.remote.webelement.WebElement (session=&quot;5a5dad43345413466ab649314a186ac7&quot;, element=&quot;ef192850-f69d-4a37-bfcf-a8c4872b51ed&quot;)&gt;]
+INFO     root:test_validation.py:13 names text [&#x27;SQL Injection&#x27;]
+INFO     root:test_validation.py:11 finding text [&lt;selenium.webdriver.remote.webelement.WebElement (session=&quot;5a5dad43345413466ab649314a186ac7&quot;, element=&quot;f6417ccc-6aa0-463b-aa80-1b04d80244c7&quot;)&gt;]
+INFO     root:test_validation.py:13 names text [&#x27;Password attack&#x27;]
+INFO     root:test_validation.py:31 name {&#x27;Name&#x27;: &#x27;Password attack&#x27;, &#x27;Number of cases&#x27;: 3285000000, &#x27;Impact score&#x27;: 5.0, &#x27;Complexity&#x27;: 1}
+INFO     root:test_validation.py:33 all_data [{&#x27;Name&#x27;: &#x27;Password attack&#x27;, &#x27;Number of cases&#x27;: 3285000000, &#x27;Impact score&#x27;: 5.0, &#x27;Complexity&#x27;: 1}]
+INFO     root:test_validation.py:52 get_name all_data [{&#x27;Name&#x27;: &#x27;Password attack&#x27;, &#x27;Number of cases&#x27;: 3285000000, &#x27;Impact score&#x27;: 5.0, &#x27;Complexity&#x27;: 1}]
+INFO     root:test_validation.py:54 get_complex all_data [{&#x27;Name&#x27;: &#x27;Password attack&#x27;, &#x27;Number of cases&#x27;: 3285000000, &#x27;Impact score&#x27;: 5.0, &#x27;Complexity&#x27;: 1}]
+INFO     root:test_validation.py:56 get_score all_data [{&#x27;Name&#x27;: &#x27;Password attack&#x27;, &#x27;Number of cases&#x27;: 3285000000, &#x27;Impact score&#x27;: 5.0, &#x27;Complexity&#x27;: 1}]
+INFO     root:test_validation.py:58 get_cases all_data [{&#x27;Name&#x27;: &#x27;Password attack&#x27;, &#x27;Number of cases&#x27;: 3285000000, &#x27;Impact score&#x27;: 5.0, &#x27;Complexity&#x27;: 1}]
+INFO     root:test_validation.py:65 sorted name [&#x27;Password attack&#x27;]
+INFO     root:test_validation.py:71 finding text [&#x27;Password attack&#x27;]
+INFO     root:test_validation.py:94 get_name all_data [&#x27;Password attack&#x27;]
+INFO     root:test_validation.py:95 names text [&#x27;Password attack&#x27;]
+INFO     root:test_validation.py:65 sorted name [&#x27;Password attack&#x27;]
+INFO     root:test_validation.py:79 finding text [3285000000]
+INFO     root:test_validation.py:94 get_name all_data [3285000000]
+INFO     root:test_validation.py:95 names text [3285000000]
+INFO     root:test_validation.py:65 sorted name [&#x27;Password attack&#x27;]
+INFO     root:test_validation.py:85 finding text [5.0]
+INFO     root:test_validation.py:94 get_name all_data [5.0]
+INFO     root:test_validation.py:95 names text [5.0]
+INFO     root:test_validation.py:65 sorted name [&#x27;Password attack&#x27;]
+INFO     root:test_validation.py:91 finding text [1]
+INFO     root:test_validation.py:94 get_name all_data [1]
+INFO     root:test_validation.py:95 names text [1]<br/></div></td></tr></tbody></table></body></html>

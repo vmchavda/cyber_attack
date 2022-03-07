@@ -1,0 +1,33 @@
+[32mINFO    [0m WDM:logger.py:12 ====== WebDriver manager ======
+[32mINFO    [0m WDM:logger.py:12 Current google-chrome version is 98.0.4758
+[32mINFO    [0m WDM:logger.py:12 Get LATEST driver version for 98.0.4758
+[32mINFO    [0m WDM:logger.py:12 Driver [C:\Users\vimal\.wdm\drivers\chromedriver\win32\98.0.4758.102\chromedriver.exe] found in cache
+[32mINFO    [0m root:conftest.py:10 Navigating url
+[32mINFO    [0m root:test_validation.py:5 navigating to cyber attack page
+[32mINFO    [0m root:test_validation.py:19 name {'Name': 'Man in the Middle', 'Number of cases': 95000, 'Impact score': 8.12, 'Complexity': 3}
+[32mINFO    [0m root:test_validation.py:19 name {'Name': 'Password attack', 'Number of cases': 3285000000, 'Impact score': 5.0, 'Complexity': 1}
+[32mINFO    [0m root:test_validation.py:19 name {'Name': 'Phishing', 'Number of cases': 2512000000, 'Impact score': 7.18, 'Complexity': 1}
+[32mINFO    [0m root:test_validation.py:19 name {'Name': 'Session hijack', 'Number of cases': 9024, 'Impact score': 5.79, 'Complexity': 3}
+[32mINFO    [0m root:test_validation.py:19 name {'Name': 'SQL Injection', 'Number of cases': 125000000, 'Impact score': 10.21, 'Complexity': 2}
+[32mINFO    [0m root:test_validation.py:19 name {'Name': 'XSS', 'Number of cases': 29850, 'Impact score': 2.19, 'Complexity': 1}
+[32mINFO    [0m root:test_validation.py:21 all_data [{'Name': 'Man in the Middle', 'Number of cases': 95000, 'Impact score': 8.12, 'Complexity': 3}, {'Name': 'Password attack', 'Number of cases': 3285000000, 'Impact score': 5.0, 'Complexity': 1}, {'Name': 'Phishing', 'Number of cases': 2512000000, 'Impact score': 7.18, 'Complexity': 1}, {'Name': 'Session hijack', 'Number of cases': 9024, 'Impact score': 5.79, 'Complexity': 3}, {'Name': 'SQL Injection', 'Number of cases': 125000000, 'Impact score': 10.21, 'Complexity': 2}, {'Name': 'XSS', 'Number of cases': 29850, 'Impact score': 2.19, 'Complexity': 1}]
+[32mINFO    [0m root:test_validation.py:40 get_name all_data [{'Name': 'Man in the Middle', 'Number of cases': 95000, 'Impact score': 8.12, 'Complexity': 3}, {'Name': 'Password attack', 'Number of cases': 3285000000, 'Impact score': 5.0, 'Complexity': 1}, {'Name': 'Phishing', 'Number of cases': 2512000000, 'Impact score': 7.18, 'Complexity': 1}, {'Name': 'SQL Injection', 'Number of cases': 125000000, 'Impact score': 10.21, 'Complexity': 2}, {'Name': 'Session hijack', 'Number of cases': 9024, 'Impact score': 5.79, 'Complexity': 3}, {'Name': 'XSS', 'Number of cases': 29850, 'Impact score': 2.19, 'Complexity': 1}]
+[32mINFO    [0m root:test_validation.py:42 get_complex all_data [{'Name': 'Password attack', 'Number of cases': 3285000000, 'Impact score': 5.0, 'Complexity': 1}, {'Name': 'Phishing', 'Number of cases': 2512000000, 'Impact score': 7.18, 'Complexity': 1}, {'Name': 'XSS', 'Number of cases': 29850, 'Impact score': 2.19, 'Complexity': 1}, {'Name': 'SQL Injection', 'Number of cases': 125000000, 'Impact score': 10.21, 'Complexity': 2}, {'Name': 'Man in the Middle', 'Number of cases': 95000, 'Impact score': 8.12, 'Complexity': 3}, {'Name': 'Session hijack', 'Number of cases': 9024, 'Impact score': 5.79, 'Complexity': 3}]
+[32mINFO    [0m root:test_validation.py:44 get_score all_data [{'Name': 'XSS', 'Number of cases': 29850, 'Impact score': 2.19, 'Complexity': 1}, {'Name': 'Password attack', 'Number of cases': 3285000000, 'Impact score': 5.0, 'Complexity': 1}, {'Name': 'Session hijack', 'Number of cases': 9024, 'Impact score': 5.79, 'Complexity': 3}, {'Name': 'Phishing', 'Number of cases': 2512000000, 'Impact score': 7.18, 'Complexity': 1}, {'Name': 'Man in the Middle', 'Number of cases': 95000, 'Impact score': 8.12, 'Complexity': 3}, {'Name': 'SQL Injection', 'Number of cases': 125000000, 'Impact score': 10.21, 'Complexity': 2}]
+[32mINFO    [0m root:test_validation.py:46 get_cases all_data [{'Name': 'Session hijack', 'Number of cases': 9024, 'Impact score': 5.79, 'Complexity': 3}, {'Name': 'XSS', 'Number of cases': 29850, 'Impact score': 2.19, 'Complexity': 1}, {'Name': 'Man in the Middle', 'Number of cases': 95000, 'Impact score': 8.12, 'Complexity': 3}, {'Name': 'SQL Injection', 'Number of cases': 125000000, 'Impact score': 10.21, 'Complexity': 2}, {'Name': 'Phishing', 'Number of cases': 2512000000, 'Impact score': 7.18, 'Complexity': 1}, {'Name': 'Password attack', 'Number of cases': 3285000000, 'Impact score': 5.0, 'Complexity': 1}]
+[32mINFO    [0m root:test_validation.py:53 sorted name ['Man in the Middle', 'Password attack', 'Phishing', 'Session hijack', 'SQL Injection', 'XSS']
+[32mINFO    [0m root:test_validation.py:59 finding text ['Man in the Middle', 'Password attack', 'Phishing', 'Session hijack', 'SQL Injection', 'XSS']
+[32mINFO    [0m root:test_validation.py:82 get_name all_data ['Man in the Middle', 'Password attack', 'Phishing', 'SQL Injection', 'Session hijack', 'XSS']
+[32mINFO    [0m root:test_validation.py:83 names text ['Man in the Middle', 'Password attack', 'Phishing', 'Session hijack', 'SQL Injection', 'XSS']
+[32mINFO    [0m root:test_validation.py:53 sorted name ['Man in the Middle', 'Password attack', 'Phishing', 'Session hijack', 'SQL Injection', 'XSS']
+[32mINFO    [0m root:test_validation.py:67 finding text [9024, 29850, 95000, 125000000, 2512000000, 3285000000]
+[32mINFO    [0m root:test_validation.py:82 get_name all_data [9024, 29850, 95000, 125000000, 2512000000, 3285000000]
+[32mINFO    [0m root:test_validation.py:83 names text [9024, 29850, 95000, 125000000, 2512000000, 3285000000]
+[32mINFO    [0m root:test_validation.py:53 sorted name ['Session hijack', 'XSS', 'Man in the Middle', 'SQL Injection', 'Phishing', 'Password attack']
+[32mINFO    [0m root:test_validation.py:73 finding text [2.19, 5.0, 5.79, 7.18, 8.12, 10.21]
+[32mINFO    [0m root:test_validation.py:82 get_name all_data [2.19, 5.0, 5.79, 7.18, 8.12, 10.21]
+[32mINFO    [0m root:test_validation.py:83 names text [2.19, 5.0, 5.79, 7.18, 8.12, 10.21]
+[32mINFO    [0m root:test_validation.py:53 sorted name ['XSS', 'Password attack', 'Session hijack', 'Phishing', 'Man in the Middle', 'SQL Injection']
+[32mINFO    [0m root:test_validation.py:79 finding text [1, 1, 1, 2, 3, 3]
+[32mINFO    [0m root:test_validation.py:82 get_name all_data [1, 1, 1, 2, 3, 3]
+[32mINFO    [0m root:test_validation.py:83 names text [1, 1, 1, 2, 3, 3]
